@@ -1,35 +1,37 @@
-// ---------------------
 // Config
-// ---------------------
-const WS_PATH = "/ws"; // On ESP32, expose a WebSocket at this path
+const WS_PATH = "/ws"; // for future ESP32 WebSocket
 const QUICK_EMOJIS = ["🤖", "🦊✨", "🗡️", "🕸️", "🌌", "😈", "💜", "🔥", "🎭", "✨"];
-const DEMO_MODE = false; // set true to force local-only fake presence
+const DEMO_MODE = true; // set false when you hook up a real node
 
-// ---------------------
 // State
-// ---------------------
 let ws = null;
 let isConnected = false;
 let selfId = null;
-let users = {}; // id -> { id, name, cosplay, bio, emoji, x, y }
-let chatLogEl, peopleListEl, radarCanvas, radarCtx;
-let connectionDotEl, connectionTextEl;
-let profileModalEl;
-let profileForm, profileNameEl, profileCosplayEl, profileBioEl, profileEmojiEl;
-let chatForm, chatInputEl, quickEmojiBarEl;
+let users = {};
+let radarZoom = 1.0;
+const MIN_ZOOM = 0.6;
+const MAX_ZOOM = 2.2;
 
-// ---------------------
-// Helpers
-// ---------------------
-function randomId() {
-  return "u_" + Math.random().toString(36).slice(2, 10);
-}
+let chatLogEl,
+  peopleListEl,
+  radarCanvas,
+  radarCtx,
+  connectionDotEl,
+  connectionTextEl,
+  profileModalEl,
+  profileForm,
+  profileNameEl,
+  profileCosplayEl,
+  profileMoodEl,
+  profileDrinkEl,
+  profileAllergiesEl,
+  profileBioEl,
+  profileEmojiEl,
+  chatForm,
+  chatInputEl,
+  quickEmojiBarEl;
 
-function nowTime() {
-  const d = new Date();
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
-
+// Shared profile helpers
 function loadProfile() {
   try {
     const stored = localStorage.getItem("tnc_profile");
@@ -50,6 +52,9 @@ function getProfile() {
     profile = {
       name: "Neon Newcomer",
       cosplay: "Mystery Cosplayer",
+      mood: "Chill orbit",
+      favoriteDrink: "Water",
+      allergies: "",
       bio: "First time at Tech N Chill.",
       emoji: "🎭"
     };
@@ -58,16 +63,23 @@ function getProfile() {
   return profile;
 }
 
-function avatarLetter(profile) {
+function avatarSymbol(profile) {
   const txt = profile.emoji && profile.emoji.trim();
   if (txt) return txt;
   const n = (profile.name || "").trim();
   return n ? n[0].toUpperCase() : "🕶️";
 }
 
-// ---------------------
-// Radar drawing
-// ---------------------
+function randomId() {
+  return "u_" + Math.random().toString(36).slice(2, 10);
+}
+
+function nowTime() {
+  const d = new Date();
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+// Radar
 function drawRadar() {
   if (!radarCanvas || !radarCtx) return;
   const w = radarCanvas.width;
@@ -76,9 +88,9 @@ function drawRadar() {
 
   const cx = w / 2;
   const cy = h / 2;
-  const maxR = Math.min(w, h) / 2 - 6;
+  const baseMaxR = Math.min(w, h) / 2 - 6;
+  const maxR = baseMaxR * radarZoom;
 
-  // grid
   radarCtx.strokeStyle = "rgba(148, 163, 184, 0.4)";
   radarCtx.lineWidth = 1;
   for (let i = 1; i <= 3; i++) {
@@ -86,7 +98,6 @@ function drawRadar() {
     radarCtx.arc(cx, cy, (maxR * i) / 3, 0, Math.PI * 2);
     radarCtx.stroke();
   }
-  // crosshairs
   radarCtx.beginPath();
   radarCtx.moveTo(cx - maxR, cy);
   radarCtx.lineTo(cx + maxR, cy);
@@ -98,7 +109,7 @@ function drawRadar() {
     const ux = u.x ?? Math.random();
     const uy = u.y ?? Math.random();
     const angle = ux * Math.PI * 2;
-    const radius = uy * maxR;
+    const radius = uy * (maxR * 0.95);
     const px = cx + Math.cos(angle) * radius;
     const py = cy + Math.sin(angle) * radius;
 
@@ -113,9 +124,12 @@ function drawRadar() {
   });
 }
 
-// ---------------------
-// People list + chat
-// ---------------------
+function adjustZoom(delta) {
+  radarZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, radarZoom + delta));
+  drawRadar();
+}
+
+// People + chat
 function renderPeopleList() {
   peopleListEl.innerHTML = "";
   const sorted = Object.values(users).sort((a, b) => {
@@ -129,7 +143,7 @@ function renderPeopleList() {
     row.className = "person-row" + (u.id === selfId ? " self" : "");
     const avatar = document.createElement("div");
     avatar.className = "person-avatar";
-    avatar.textContent = avatarLetter(u);
+    avatar.textContent = avatarSymbol(u);
 
     const main = document.createElement("div");
     main.className = "person-main";
@@ -138,9 +152,12 @@ function renderPeopleList() {
     nameEl.className = "person-name";
     nameEl.textContent = u.name || "Unknown";
 
+    const mood = u.mood || "Chill orbit";
+    const drink = u.favoriteDrink || "Water";
     const metaEl = document.createElement("p");
     metaEl.className = "person-meta";
-    metaEl.textContent = (u.cosplay || "Unknown cosplay") + (u.bio ? " · " + u.bio : "");
+    metaEl.textContent =
+      (u.cosplay || "Unknown cosplay") + " · " + mood + " · Fav: " + drink;
 
     main.appendChild(nameEl);
     main.appendChild(metaEl);
@@ -162,7 +179,7 @@ function appendChatMessage(msg, isSelf) {
   row.className = "chat-message" + (isSelf ? " self" : "");
   const avatar = document.createElement("div");
   avatar.className = "chat-avatar";
-  avatar.textContent = avatarLetter(msg.profile || getProfile());
+  avatar.textContent = avatarSymbol(msg.profile || getProfile());
 
   const bubble = document.createElement("div");
   bubble.className = "chat-bubble";
@@ -185,9 +202,7 @@ function appendChatMessage(msg, isSelf) {
   chatLogEl.scrollTop = chatLogEl.scrollHeight;
 }
 
-// ---------------------
-// WebSocket & demo mode
-// ---------------------
+// Connection / demo
 function setConnection(connected) {
   isConnected = connected;
   if (connected) {
@@ -201,120 +216,8 @@ function setConnection(connected) {
   }
 }
 
-function connectWebSocket() {
-  if (DEMO_MODE) {
-    startDemoMode();
-    return;
-  }
-
-  const wsUrl = (() => {
-    const loc = window.location;
-    const protocol = loc.protocol === "https:" ? "wss:" : "ws:";
-    return `${protocol}//${loc.host}${WS_PATH}`;
-  })();
-
-  try {
-    ws = new WebSocket(wsUrl);
-  } catch (e) {
-    startDemoMode();
-    return;
-  }
-
-  ws.onopen = () => {
-    setConnection(true);
-    const profile = getProfile();
-    selfId = selfId || randomId();
-    const payload = {
-      type: "join",
-      id: selfId,
-      profile
-    };
-    ws.send(JSON.stringify(payload));
-  };
-
-  ws.onmessage = (event) => {
-    let data;
-    try {
-      data = JSON.parse(event.data);
-    } catch {
-      return;
-    }
-
-    /*
-      Expected messages from server (ESP32 later):
-
-      1) Presence snapshot:
-         { type: "presence", users: [ { id, profile: {...}, x, y }, ... ] }
-
-      2) User joined/updated:
-         { type: "user", user: { id, profile, x, y } }
-
-      3) User left:
-         { type: "leave", id }
-
-      4) Chat message:
-         { type: "chat", id, profile, text, time }
-
-      The frontend doesn't care who sends it (ESP or other backend).
-    */
-
-    if (data.type === "presence" && Array.isArray(data.users)) {
-      users = {};
-      data.users.forEach((u) => {
-        users[u.id] = {
-          id: u.id,
-          name: u.profile?.name,
-          cosplay: u.profile?.cosplay,
-          bio: u.profile?.bio,
-          emoji: u.profile?.emoji,
-          x: u.x,
-          y: u.y
-        };
-      });
-      renderPeopleList();
-      drawRadar();
-    }
-
-    if (data.type === "user" && data.user) {
-      const u = data.user;
-      users[u.id] = {
-        id: u.id,
-        name: u.profile?.name,
-        cosplay: u.profile?.cosplay,
-        bio: u.profile?.bio,
-        emoji: u.profile?.emoji,
-        x: u.x,
-        y: u.y
-      };
-      renderPeopleList();
-      drawRadar();
-    }
-
-    if (data.type === "leave" && data.id) {
-      delete users[data.id];
-      renderPeopleList();
-      drawRadar();
-    }
-
-    if (data.type === "chat") {
-      appendChatMessage(data, data.id === selfId);
-    }
-  };
-
-  ws.onerror = () => {
-    startDemoMode();
-  };
-
-  ws.onclose = () => {
-    if (!DEMO_MODE) {
-      setConnection(false);
-    }
-  };
-}
-
 function startDemoMode() {
   setConnection(false);
-  // local-only fake users
   selfId = selfId || randomId();
   const profile = getProfile();
   users = {
@@ -322,6 +225,9 @@ function startDemoMode() {
       id: selfId,
       name: profile.name,
       cosplay: profile.cosplay,
+      mood: profile.mood,
+      favoriteDrink: profile.favoriteDrink,
+      allergies: profile.allergies,
       bio: profile.bio,
       emoji: profile.emoji,
       x: Math.random(),
@@ -331,6 +237,8 @@ function startDemoMode() {
       id: "demo1",
       name: "Cyber Kitsune",
       cosplay: "Neo fox rogue",
+      mood: "On the hunt",
+      favoriteDrink: "Neon Fox",
       bio: "Stalking the bassline.",
       emoji: "🦊✨",
       x: 0.2,
@@ -340,6 +248,8 @@ function startDemoMode() {
       id: "demo2",
       name: "Mecha Oracle",
       cosplay: "Mecha priestess",
+      mood: "Chill orbit",
+      favoriteDrink: "Plasma Shot",
       bio: "Predicting drops and plot twists.",
       emoji: "🤖💜",
       x: 0.8,
@@ -349,6 +259,8 @@ function startDemoMode() {
       id: "demo3",
       name: "Starlit Blade",
       cosplay: "Space knight",
+      mood: "Dancefloor only",
+      favoriteDrink: "Starfall Spritz",
       bio: "Guarding the dance floor.",
       emoji: "🗡️🌌",
       x: 0.5,
@@ -368,9 +280,7 @@ function startDemoMode() {
   );
 }
 
-// ---------------------
-// Events
-// ---------------------
+// Profile modal
 function setupProfileModal() {
   const openBtn = document.getElementById("edit-profile-btn");
   const closeBtn = document.getElementById("close-profile-btn");
@@ -380,6 +290,9 @@ function setupProfileModal() {
     const profile = getProfile();
     profileNameEl.value = profile.name;
     profileCosplayEl.value = profile.cosplay;
+    profileMoodEl.value = profile.mood || "Chill orbit";
+    profileDrinkEl.value = profile.favoriteDrink || "";
+    profileAllergiesEl.value = profile.allergies || "";
     profileBioEl.value = profile.bio;
     profileEmojiEl.value = profile.emoji;
     profileModalEl.classList.add("visible");
@@ -394,6 +307,9 @@ function setupProfileModal() {
     const profile = getProfile();
     profileNameEl.value = profile.name;
     profileCosplayEl.value = profile.cosplay;
+    profileMoodEl.value = profile.mood;
+    profileDrinkEl.value = profile.favoriteDrink;
+    profileAllergiesEl.value = profile.allergies;
     profileBioEl.value = profile.bio;
     profileEmojiEl.value = profile.emoji;
   });
@@ -403,19 +319,24 @@ function setupProfileModal() {
     const profile = {
       name: profileNameEl.value.trim() || "Neon Newcomer",
       cosplay: profileCosplayEl.value.trim() || "Mystery Cosplayer",
+      mood: profileMoodEl.value || "Chill orbit",
+      favoriteDrink: profileDrinkEl.value.trim() || "Water",
+      allergies: profileAllergiesEl.value.trim(),
       bio: profileBioEl.value.trim(),
       emoji: profileEmojiEl.value.trim() || "🎭"
     };
     saveProfile(profile);
     profileModalEl.classList.remove("visible");
 
-    // Update local user + notify server
     if (!selfId) selfId = randomId();
     users[selfId] = {
       ...(users[selfId] || { id: selfId }),
       id: selfId,
       name: profile.name,
       cosplay: profile.cosplay,
+      mood: profile.mood,
+      favoriteDrink: profile.favoriteDrink,
+      allergies: profile.allergies,
       bio: profile.bio,
       emoji: profile.emoji,
       x: users[selfId]?.x ?? Math.random(),
@@ -436,6 +357,7 @@ function setupProfileModal() {
   });
 }
 
+// Chat + emojis
 function setupChat() {
   chatForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -454,7 +376,6 @@ function setupChat() {
     if (ws && isConnected) {
       ws.send(JSON.stringify(msg));
     } else {
-      // local echo
       appendChatMessage(msg, true);
     }
 
@@ -480,9 +401,104 @@ function setupQuickEmojis() {
   });
 }
 
-// ---------------------
+// WebSocket (future ESP32)
+function connectWebSocket() {
+  if (DEMO_MODE) {
+    startDemoMode();
+    return;
+  }
+
+  const loc = window.location;
+  const protocol = loc.protocol === "https:" ? "wss:" : "ws:";
+  const wsUrl = `${protocol}//${loc.host}${WS_PATH}`;
+
+  try {
+    ws = new WebSocket(wsUrl);
+  } catch {
+    startDemoMode();
+    return;
+  }
+
+  ws.onopen = () => {
+    setConnection(true);
+    const profile = getProfile();
+    selfId = selfId || randomId();
+    ws.send(
+      JSON.stringify({
+        type: "join",
+        id: selfId,
+        profile
+      })
+    );
+  };
+
+  ws.onmessage = (event) => {
+    let data;
+    try {
+      data = JSON.parse(event.data);
+    } catch {
+      return;
+    }
+
+    if (data.type === "presence" && Array.isArray(data.users)) {
+      users = {};
+      data.users.forEach((u) => {
+        users[u.id] = {
+          id: u.id,
+          name: u.profile?.name,
+          cosplay: u.profile?.cosplay,
+          mood: u.profile?.mood,
+          favoriteDrink: u.profile?.favoriteDrink,
+          allergies: u.profile?.allergies,
+          bio: u.profile?.bio,
+          emoji: u.profile?.emoji,
+          x: u.x,
+          y: u.y
+        };
+      });
+      renderPeopleList();
+      drawRadar();
+    }
+
+    if (data.type === "user" && data.user) {
+      const u = data.user;
+      users[u.id] = {
+        id: u.id,
+        name: u.profile?.name,
+        cosplay: u.profile?.cosplay,
+        mood: u.profile?.mood,
+        favoriteDrink: u.profile?.favoriteDrink,
+        allergies: u.profile?.allergies,
+        bio: u.profile?.bio,
+        emoji: u.profile?.emoji,
+        x: u.x,
+        y: u.y
+      };
+      renderPeopleList();
+      drawRadar();
+    }
+
+    if (data.type === "leave" && data.id) {
+      delete users[data.id];
+      renderPeopleList();
+      drawRadar();
+    }
+
+    if (data.type === "chat") {
+      appendChatMessage(data, data.id === selfId);
+    }
+  };
+
+  ws.onerror = () => {
+    startDemoMode();
+  };
+
+  ws.onclose = () => {
+    if (!DEMO_MODE) setConnection(false);
+  };
+}
+
 // Init
-// ---------------------
 window.addEventListener("load", () => {
   chatLogEl = document.getElementById("chat-log");
   peopleListEl = document.getElementById("people-list");
@@ -495,6 +511,9 @@ window.addEventListener("load", () => {
   profileForm = document.getElementById("profile-form");
   profileNameEl = document.getElementById("profile-name");
   profileCosplayEl = document.getElementById("profile-cosplay");
+  profileMoodEl = document.getElementById("profile-mood");
+  profileDrinkEl = document.getElementById("profile-drink");
+  profileAllergiesEl = document.getElementById("profile-allergies");
   profileBioEl = document.getElementById("profile-bio");
   profileEmojiEl = document.getElementById("profile-emoji");
 
@@ -502,7 +521,9 @@ window.addEventListener("load", () => {
   chatInputEl = document.getElementById("chat-input");
   quickEmojiBarEl = document.getElementById("quick-emoji-bar");
 
-  // canvas sizing
+  const zoomInBtn = document.getElementById("zoom-in");
+  const zoomOutBtn = document.getElementById("zoom-out");
+
   function resizeCanvas() {
     const rect = radarCanvas.getBoundingClientRect();
     radarCanvas.width = rect.width * window.devicePixelRatio;
@@ -512,6 +533,35 @@ window.addEventListener("load", () => {
   }
   window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
+
+  // Zoom buttons
+  zoomInBtn.addEventListener("click", () => adjustZoom(0.2));
+  zoomOutBtn.addEventListener("click", () => adjustZoom(-0.2));
+
+  // Mouse wheel zoom (desktop)
+  radarCanvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    adjustZoom(delta);
+  });
+
+  // Basic pinch‑zoom (touch scale approximation)
+  let lastTouchDist = null;
+  radarCanvas.addEventListener("touchmove", (e) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (lastTouchDist != null) {
+        const diff = dist - lastTouchDist;
+        adjustZoom(diff * 0.002);
+      }
+      lastTouchDist = dist;
+    }
+  });
+  radarCanvas.addEventListener("touchend", () => {
+    lastTouchDist = null;
+  });
 
   setupProfileModal();
   setupChat();

@@ -8,6 +8,8 @@
 </head>
 <body>
   <div id="app">
+
+    <!-- HEADER -->
     <header class="tnc-header">
       <div class="logo-block">
         <div class="logo-orb"></div>
@@ -17,9 +19,14 @@
         </div>
       </div>
 
+      <!-- UPDATED NAVIGATION -->
       <nav class="tnc-nav">
         <a href="index.html" class="nav-link">Nightlink</a>
-        <a href="menu.html" class="nav-link nav-link-active">Menu & Drinks</a>
+        <a href="menu.html" class="nav-link nav-link-active">Menu</a>
+        <a href="pong.html" class="nav-link">Pong</a>
+        <a href="quiz.html" class="nav-link">Quiz</a>
+        <a href="lobby.html" class="nav-link">Lobby</a>
+        <a href="live.html" class="nav-link">Live</a>
       </nav>
 
       <div class="status-block">
@@ -28,24 +35,22 @@
       </div>
     </header>
 
+    <!-- MAIN CONTENT -->
     <main class="tnc-main tnc-main-menu">
+
       <section class="menu-left">
         <div class="panel">
           <div class="panel-header">
-            <div>
-              <h2>Signature Cosplay Cocktails</h2>
-              <p>Themed mixes for the night</p>
-            </div>
+            <h2>Signature Cocktails</h2>
+            <p>Themed mixes for the night</p>
           </div>
           <div class="menu-list" id="signature-menu"></div>
         </div>
 
         <div class="panel">
           <div class="panel-header">
-            <div>
-              <h2>Standard Drinks</h2>
-              <p>Classics, neat or mixed</p>
-            </div>
+            <h2>Standard Drinks</h2>
+            <p>Classics, neat or mixed</p>
           </div>
           <div class="menu-list" id="standard-menu"></div>
         </div>
@@ -54,27 +59,25 @@
       <section class="menu-right">
         <div class="panel">
           <div class="panel-header">
-            <div>
-              <h2>Food & Energy</h2>
-              <p>Bites to keep your HP up</p>
-            </div>
+            <h2>Food & Energy</h2>
+            <p>Bites to keep your HP up</p>
           </div>
           <div class="menu-list" id="food-menu"></div>
         </div>
 
         <div class="panel order-panel">
           <div class="panel-header">
-            <div>
-              <h2>Your Order</h2>
-              <p>Sent to the bar when linked</p>
-            </div>
-            <button id="edit-profile-btn" class="btn-ghost btn-ghost-sm">Persona</button>
+            <h2>Your Order</h2>
+            <p>Sent to the bar when linked</p>
           </div>
+
           <div class="order-body">
             <div id="order-summary-empty" class="order-empty">
               <p>No items yet. Tap a drink or food to add it.</p>
             </div>
+
             <ul id="order-items" class="order-items"></ul>
+
             <div class="order-footer">
               <div class="order-total">
                 <span>Total</span>
@@ -82,33 +85,27 @@
               </div>
               <button id="submit-order-btn" class="btn-primary" disabled>Send Order</button>
             </div>
+
             <div id="order-status" class="order-status"></div>
           </div>
         </div>
       </section>
+
     </main>
   </div>
 
-  <!-- Profile modal (shared fields) -->
+  <!-- PROFILE MODAL -->
   <div class="modal-backdrop" id="profile-modal">
     <div class="modal">
       <div class="modal-header">
         <h2>Your Tech N Chill Persona</h2>
         <button id="close-profile-btn" class="btn-icon">✕</button>
       </div>
+
       <form id="profile-form" class="modal-body">
-        <label>
-          Display Name
-          <input type="text" id="profile-name" maxlength="24" placeholder="Neon Kitsune, Mecha Mage…" />
-        </label>
-
-        <label>
-          Cosplay Type
-          <input type="text" id="profile-cosplay" maxlength="32" placeholder="Cyber ninja, space witch, mecha pilot…" />
-        </label>
-
-        <label>
-          Tonight’s Mood
+        <label>Display Name <input type="text" id="profile-name" /></label>
+        <label>Cosplay Type <input type="text" id="profile-cosplay" /></label>
+        <label>Tonight’s Mood
           <select id="profile-mood">
             <option value="Chill orbit">🌌 Chill orbit</option>
             <option value="On the hunt">🗡️ On the hunt</option>
@@ -117,46 +114,10 @@
             <option value="Chaos gremlin">😈 Chaos gremlin</option>
           </select>
         </label>
-
-        <label>
-          Favorite Drink
-          <input
-            type="text"
-            id="profile-drink"
-            maxlength="32"
-            placeholder="Neon Fox, Plasma Shot, Water…"
-          />
-        </label>
-
-        <label>
-          Allergies / Notes for Bar
-          <textarea
-            id="profile-allergies"
-            rows="2"
-            maxlength="120"
-            placeholder="No citrus, low sugar, mocktails only, etc."
-          ></textarea>
-        </label>
-
-        <label>
-          Quick Bio
-          <textarea
-            id="profile-bio"
-            rows="3"
-            maxlength="140"
-            placeholder="Short, chaotic, mysterious. What’s your vibe tonight?"
-          ></textarea>
-        </label>
-
-        <label>
-          Emoji Signature
-          <input
-            type="text"
-            id="profile-emoji"
-            maxlength="12"
-            placeholder="🦊✨ or 🤖💜 or 🗡️🌌"
-          />
-        </label>
+        <label>Favorite Drink <input type="text" id="profile-drink" /></label>
+        <label>Allergies / Notes <textarea id="profile-allergies"></textarea></label>
+        <label>Quick Bio <textarea id="profile-bio"></textarea></label>
+        <label>Emoji Signature <input type="text" id="profile-emoji" /></label>
 
         <div class="modal-footer">
           <button type="button" id="reset-profile-btn" class="btn-ghost">Reset</button>

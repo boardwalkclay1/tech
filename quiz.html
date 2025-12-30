@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cosplay Quiz Battle</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="tnc-header">
+      <div class="logo-block">
+        <div class="logo-orb"></div>
+        <div class="logo-text">
+          <h1>Quiz Battle</h1>
+          <p>Cosplay Knowledge Ranking</p>
+        </div>
+      </div>
+
+      <nav class="tnc-nav">
+        <a href="index.html" class="nav-link">Nightlink</a>
+        <a href="menu.html" class="nav-link">Menu</a>
+        <a href="pong.html" class="nav-link">Pong</a>
+        <a href="quiz.html" class="nav-link nav-link-active">Quiz</a>
+      </nav>
+
+      <div class="status-block">
+        <span id="connection-dot" class="status-dot status-disconnected"></span>
+        <span id="connection-text">Connecting…</span>
+      </div>
+    </header>
+
+    <main class="quiz-main">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Cosplay Quiz Battle</h2>
+          <p>Answer fast · Score high · Rank up</p>
+        </div>
+
+        <div id="quiz-container"></div>
+
+        <div id="quiz-leaderboard" class="quiz-leaderboard"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="quiz.js"></script>
+</body>
+</html>

@@ -8,6 +8,8 @@
 </head>
 <body>
   <div id="app">
+
+    <!-- HEADER -->
     <header class="tnc-header">
       <div class="logo-block">
         <div class="logo-orb"></div>
@@ -17,9 +19,14 @@
         </div>
       </div>
 
+      <!-- UPDATED NAVIGATION -->
       <nav class="tnc-nav">
         <a href="index.html" class="nav-link nav-link-active">Nightlink</a>
-        <a href="menu.html" class="nav-link">Menu & Drinks</a>
+        <a href="menu.html" class="nav-link">Menu</a>
+        <a href="pong.html" class="nav-link">Pong</a>
+        <a href="quiz.html" class="nav-link">Quiz</a>
+        <a href="lobby.html" class="nav-link">Lobby</a>
+        <a href="live.html" class="nav-link">Live</a>
       </nav>
 
       <div class="status-block">
@@ -28,8 +35,10 @@
       </div>
     </header>
 
+    <!-- MAIN CONTENT -->
     <main class="tnc-main">
-      <!-- Radar + vibe -->
+
+      <!-- RADAR + VIBE -->
       <section class="radar-section">
         <div class="panel">
           <div class="panel-header">
@@ -42,9 +51,11 @@
               <button id="zoom-in" class="btn-circle">+</button>
             </div>
           </div>
+
           <div class="radar-wrapper">
             <canvas id="radar-canvas"></canvas>
           </div>
+
           <div class="legend">
             <span class="legend-item"><span class="dot-self"></span>You</span>
             <span class="legend-item"><span class="dot-other"></span>Others</span>
@@ -69,7 +80,7 @@
         </div>
       </section>
 
-      <!-- People + chat -->
+      <!-- PEOPLE + CHAT -->
       <section class="social-section">
         <div class="panel people-panel">
           <div class="panel-header">
@@ -90,41 +101,31 @@
             </div>
             <div class="chat-emoji-bar" id="quick-emoji-bar"></div>
           </div>
+
           <div class="chat-log" id="chat-log"></div>
+
           <form id="chat-form" class="chat-input-row">
-            <input
-              type="text"
-              id="chat-input"
-              autocomplete="off"
-              placeholder="Say something to the club…"
-            />
+            <input type="text" id="chat-input" autocomplete="off" placeholder="Say something to the club…" />
             <button type="submit" class="btn-primary">Send</button>
           </form>
         </div>
       </section>
+
     </main>
   </div>
 
-  <!-- Profile modal -->
+  <!-- PROFILE MODAL -->
   <div class="modal-backdrop" id="profile-modal">
     <div class="modal">
       <div class="modal-header">
         <h2>Your Tech N Chill Persona</h2>
         <button id="close-profile-btn" class="btn-icon">✕</button>
       </div>
+
       <form id="profile-form" class="modal-body">
-        <label>
-          Display Name
-          <input type="text" id="profile-name" maxlength="24" placeholder="Neon Kitsune, Mecha Mage…" />
-        </label>
-
-        <label>
-          Cosplay Type
-          <input type="text" id="profile-cosplay" maxlength="32" placeholder="Cyber ninja, space witch, mecha pilot…" />
-        </label>
-
-        <label>
-          Tonight’s Mood
+        <label>Display Name <input type="text" id="profile-name" maxlength="24" /></label>
+        <label>Cosplay Type <input type="text" id="profile-cosplay" maxlength="32" /></label>
+        <label>Tonight’s Mood
           <select id="profile-mood">
             <option value="Chill orbit">🌌 Chill orbit</option>
             <option value="On the hunt">🗡️ On the hunt</option>
@@ -133,46 +134,10 @@
             <option value="Chaos gremlin">😈 Chaos gremlin</option>
           </select>
         </label>
-
-        <label>
-          Favorite Drink
-          <input
-            type="text"
-            id="profile-drink"
-            maxlength="32"
-            placeholder="Neon Fox, Plasma Shot, Water…"
-          />
-        </label>
-
-        <label>
-          Allergies / Notes for Bar
-          <textarea
-            id="profile-allergies"
-            rows="2"
-            maxlength="120"
-            placeholder="No citrus, low sugar, mocktails only, etc."
-          ></textarea>
-        </label>
-
-        <label>
-          Quick Bio
-          <textarea
-            id="profile-bio"
-            rows="3"
-            maxlength="140"
-            placeholder="Short, chaotic, mysterious. What’s your vibe tonight?"
-          ></textarea>
-        </label>
-
-        <label>
-          Emoji Signature
-          <input
-            type="text"
-            id="profile-emoji"
-            maxlength="12"
-            placeholder="🦊✨ or 🤖💜 or 🗡️🌌"
-          />
-        </label>
+        <label>Favorite Drink <input type="text" id="profile-drink" maxlength="32" /></label>
+        <label>Allergies / Notes <textarea id="profile-allergies" rows="2"></textarea></label>
+        <label>Quick Bio <textarea id="profile-bio" rows="3"></textarea></label>
+        <label>Emoji Signature <input type="text" id="profile-emoji" maxlength="12" /></label>
 
         <div class="modal-footer">
           <button type="button" id="reset-profile-btn" class="btn-ghost">Reset</button>

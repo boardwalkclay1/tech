@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Games Lobby · Tech N Chill</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="tnc-header">
+      <div class="logo-block">
+        <div class="logo-orb"></div>
+        <div class="logo-text">
+          <h1>Games Lobby</h1>
+          <p>Pick your chaos mode</p>
+        </div>
+      </div>
+
+      <nav class="tnc-nav">
+        <a href="index.html" class="nav-link">Nightlink</a>
+        <a href="menu.html" class="nav-link">Menu</a>
+        <a href="pong.html" class="nav-link">Pong</a>
+        <a href="quiz.html" class="nav-link">Quiz</a>
+        <a href="lobby.html" class="nav-link nav-link-active">Lobby</a>
+        <a href="live.html" class="nav-link">Live Screen</a>
+      </nav>
+
+      <div class="status-block">
+        <span id="connection-dot" class="status-dot status-disconnected"></span>
+        <span id="connection-text">Local Only</span>
+      </div>
+    </header>
+
+    <main class="lobby-main">
+      <div class="panel lobby-grid">
+        <div class="lobby-card">
+          <h2>Pong Arena</h2>
+          <p>Classic 1v1 chaos. Challenge someone on the node and defend your side.</p>
+          <ul class="lobby-meta">
+            <li>🎮 Head‑to‑head</li>
+            <li>💥 Quick rounds</li>
+            <li>🏅 Unlock Pong badges</li>
+          </ul>
+          <a href="pong.html" class="btn-primary lobby-btn-link">Enter Pong Arena</a>
+        </div>
+
+        <div class="lobby-card">
+          <h2>Cosplay Quiz Battle</h2>
+          <p>Test your lore knowledge and climb the ranking. Highest score wins bragging rights.</p>
+          <ul class="lobby-meta">
+            <li>🎭 Cosplay questions</li>
+            <li>📈 Live score</li>
+            <li>🏅 Lore Master badges</li>
+          </ul>
+          <a href="quiz.html" class="btn-primary lobby-btn-link">Start Quiz Battle</a>
+        </div>
+
+        <div class="lobby-card">
+          <h2>Nightlink & Bar Console</h2>
+          <p>See who’s here, chat with the club, and order drinks from your phone.</p>
+          <ul class="lobby-meta">
+            <li>🛰️ Radar & presence</li>
+            <li>💬 Club chat</li>
+            <li>🍹 Drink ordering</li>
+          </ul>
+          <div class="lobby-links-row">
+            <a href="index.html" class="btn-ghost lobby-btn-link">Nightlink</a>
+            <a href="menu.html" class="btn-ghost lobby-btn-link">Menu & Drinks</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="lobby.js"></script>
+</body>
+</html>

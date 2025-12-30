@@ -16,6 +16,12 @@
           <p>Cosplay Nightlink · Local Only</p>
         </div>
       </div>
+
+      <nav class="tnc-nav">
+        <a href="index.html" class="nav-link nav-link-active">Nightlink</a>
+        <a href="menu.html" class="nav-link">Menu & Drinks</a>
+      </nav>
+
       <div class="status-block">
         <span id="connection-dot" class="status-dot status-disconnected"></span>
         <span id="connection-text">Connecting…</span>
@@ -23,12 +29,18 @@
     </header>
 
     <main class="tnc-main">
-      <!-- Radar + vibe section -->
+      <!-- Radar + vibe -->
       <section class="radar-section">
         <div class="panel">
           <div class="panel-header">
-            <h2>Cosplay Radar</h2>
-            <p>See who’s vibing in the club</p>
+            <div>
+              <h2>Cosplay Radar</h2>
+              <p>See who’s vibing in the club</p>
+            </div>
+            <div class="radar-zoom-controls">
+              <button id="zoom-out" class="btn-circle">−</button>
+              <button id="zoom-in" class="btn-circle">+</button>
+            </div>
           </div>
           <div class="radar-wrapper">
             <canvas id="radar-canvas"></canvas>
@@ -50,6 +62,8 @@
               <li>🗡️ Fantasy Knights</li>
               <li>🤖 Mecha Suits</li>
               <li>🌸 Magical Girls</li>
+              <li>🛸 Space Pirates</li>
+              <li>🧬 Biohackers</li>
             </ul>
           </div>
         </div>
@@ -59,24 +73,24 @@
       <section class="social-section">
         <div class="panel people-panel">
           <div class="panel-header">
-            <h2>Inside Tech N Chill</h2>
-            <button id="edit-profile-btn" class="btn-ghost">Edit Profile</button>
+            <div>
+              <h2>Inside Tech N Chill</h2>
+              <p>Everyone linked to this node</p>
+            </div>
+            <button id="edit-profile-btn" class="btn-ghost">Edit Persona</button>
           </div>
-          <div class="people-list" id="people-list">
-            <!-- Filled by script.js -->
-          </div>
+          <div class="people-list" id="people-list"></div>
         </div>
 
         <div class="panel chat-panel">
           <div class="panel-header">
-            <h2>Club Chat</h2>
-            <div class="chat-emoji-bar" id="quick-emoji-bar">
-              <!-- Quick emojis -->
+            <div>
+              <h2>Club Chat</h2>
+              <p>Say hi to the room</p>
             </div>
+            <div class="chat-emoji-bar" id="quick-emoji-bar"></div>
           </div>
-          <div class="chat-log" id="chat-log">
-            <!-- Messages injected here -->
-          </div>
+          <div class="chat-log" id="chat-log"></div>
           <form id="chat-form" class="chat-input-row">
             <input
               type="text"
@@ -107,6 +121,37 @@
         <label>
           Cosplay Type
           <input type="text" id="profile-cosplay" maxlength="32" placeholder="Cyber ninja, space witch, mecha pilot…" />
+        </label>
+
+        <label>
+          Tonight’s Mood
+          <select id="profile-mood">
+            <option value="Chill orbit">🌌 Chill orbit</option>
+            <option value="On the hunt">🗡️ On the hunt</option>
+            <option value="Dancefloor only">💃 Dancefloor only</option>
+            <option value="Photo op mode">📸 Photo op mode</option>
+            <option value="Chaos gremlin">😈 Chaos gremlin</option>
+          </select>
+        </label>
+
+        <label>
+          Favorite Drink
+          <input
+            type="text"
+            id="profile-drink"
+            maxlength="32"
+            placeholder="Neon Fox, Plasma Shot, Water…"
+          />
+        </label>
+
+        <label>
+          Allergies / Notes for Bar
+          <textarea
+            id="profile-allergies"
+            rows="2"
+            maxlength="120"
+            placeholder="No citrus, low sugar, mocktails only, etc."
+          ></textarea>
         </label>
 
         <label>

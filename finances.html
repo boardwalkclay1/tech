@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TNC Finances · Tech N Chill</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div id="app">
+
+    <header class="tnc-header">
+      <div class="logo-block">
+        <div class="logo-orb"></div>
+        <div class="logo-text">
+          <h1>Finances</h1>
+          <p>Tech N Chill Revenue & Expenses</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="tnc-main">
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Finances</h2>
+            <p>Revenue · Payouts · Expenses</p>
+          </div>
+          <div>
+            <button data-type="revenue" class="btn-ghost btn-ghost-sm admin-add-finance">Add Revenue</button>
+            <button data-type="expense" class="btn-ghost btn-ghost-sm admin-add-finance">Add Expense</button>
+            <button data-type="payout" class="btn-ghost btn-ghost-sm admin-add-finance">Add Payout</button>
+          </div>
+        </div>
+
+        <div id="finance-summary" class="admin-summary-grid"></div>
+
+        <div class="admin-finance-lists">
+          <div class="admin-finance-panel">
+            <div class="admin-summary-label">Revenue Entries</div>
+            <div id="finance-revenue-list"></div>
+          </div>
+
+          <div class="admin-finance-panel">
+            <div class="admin-summary-label">Expenses</div>
+            <div id="finance-expense-list"></div>
+          </div>
+
+          <div class="admin-finance-panel">
+            <div class="admin-summary-label">Payouts</div>
+            <div id="finance-payout-list"></div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

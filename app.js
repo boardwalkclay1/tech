@@ -1,7 +1,6 @@
 // app.js — Tech N Chill Global Wiring
-// Works across ALL pages in the root directory
 
-const ADMIN_PIN = "4242"; // Change this to your real PIN
+const ADMIN_PIN = "4242";
 
 let connectionDotEl, connectionTextEl;
 let modalBackdropEl, modalInputEl, modalErrorEl;
@@ -32,7 +31,6 @@ let tapTimer = null;
 function setupAdminHotspot() {
   let hotspot = document.getElementById("admin-hotspot");
 
-  // Create hotspot if missing
   if (!hotspot) {
     hotspot = document.createElement("div");
     hotspot.id = "admin-hotspot";
@@ -53,18 +51,19 @@ function setupAdminHotspot() {
 }
 
 // -----------------------------
-// PIN MODAL
+// PIN MODAL (FIXED)
 // -----------------------------
 function createPinModalIfNeeded() {
-  if (document.querySelector(".modal-backdrop")) return;
+  // FIX: Only block creation if *admin* modal exists
+  if (document.querySelector(".admin-pin-modal")) return;
 
   const backdrop = document.createElement("div");
-  backdrop.className = "modal-backdrop";
+  backdrop.className = "modal-backdrop admin-pin-modal"; // FIXED CLASS
   backdrop.innerHTML = `
     <div class="modal">
       <div class="modal-header">
         <h2>Admin Access</h2>
-        <button class="btn-icon" id="admin-modal-close">&times;</button>
+        <button class="btn-icon" id="admin-modal-close">✕</button>
       </div>
 
       <div class="modal-body">
@@ -130,8 +129,6 @@ window.addEventListener("load", () => {
   connectionDotEl = document.getElementById("connection-dot");
   connectionTextEl = document.getElementById("connection-text");
 
-  // Default: offline demo mode
   setConnection(false);
-
   setupAdminHotspot();
 });

@@ -1,67 +1,705 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TNC Admin · Tech N Chill</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+// admin.js — Tech N Chill Admin CRM
 
-<body>
-  <div id="app">
+const STORAGE_KEYS = {
+  events: "tnc_admin_events",
+  employees: "tnc_admin_employees",
+  promoters: "tnc_admin_promoters",
+  finances: "tnc_admin_finances"
+};
 
-    <header class="tnc-header">
-      <div class="logo-block">
-        <div class="logo-orb"></div>
-        <div class="logo-text">
-          <h1>Admin Panel</h1>
-          <p>Tech N Chill Control Center</p>
-        </div>
-      </div>
-    </header>
+let events = [];
+let employees = [];
+let promoters = [];
+let finances = {
+  revenue: [],
+  expenses: [],
+  payouts: []
+};
 
-    <main class="tnc-main">
+// ---------- UTIL / STORAGE ----------
 
-      <!-- Calendar -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Show Calendar</h2>
-          <p>Upcoming events & cosplay nights</p>
-        </div>
-        <div id="calendar"></div>
-      </div>
+function loadData() {
+  events = JSON.parse(localStorage.getItem(STORAGE_KEYS.events) || "[]");
+  employees = JSON.parse(localStorage.getItem(STORAGE_KEYS.employees) || "[]");
+  promoters = JSON.parse(localStorage.getItem(STORAGE_KEYS.promoters) || "[]");
+  finances = JSON.parse(
+    localStorage.getItem(STORAGE_KEYS.finances) ||
+      '{"revenue":[],"expenses":[],"payouts":[]}'
+  );
+}
 
-      <!-- Employees -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Employees</h2>
-          <p>Staff roster & roles</p>
-        </div>
-        <div id="employees"></div>
-      </div>
+function saveData() {
+  localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
+  localStorage.setItem(STORAGE_KEYS.employees, JSON.stringify(employees));
+  localStorage.setItem(STORAGE_KEYS.promoters, JSON.stringify(promoters));
+  localStorage.setItem(STORAGE_KEYS.finances, JSON.stringify(finances));
+}
 
-      <!-- Promoters -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Promoters</h2>
-          <p>Bookings & partnerships</p>
-        </div>
-        <div id="promoters"></div>
-      </div>
+function uid() {
+  return "id_" + Math.random().toString(36).slice(2, 10);
+}
 
-      <!-- Finances -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Finances</h2>
-          <p>Revenue · Payouts · Expenses</p>
-        </div>
-        <div id="finances"></div>
-      </div>
+function formatDate(d) {
+  return new Date(d).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  });
+}
 
-    </main>
+// ---------- CALENDAR ----------
 
-  </div>
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
 
-  <script src="admin.js"></script>
-</body>
-</html>
+function renderCalendar() {
+  const container = document.getElementById("calendar");
+  container.innerHTML = "";
+
+  const header = document.createElement("div");
+  header.style.display = "flex";
+  header.style.justifyContent = "space-between";
+  header.style.alignItems = "center";
+  header.style.marginBottom = "8px";
+
+  const monthLabel = document.createElement("div");
+  monthLabel.textContent = new Date(currentYear, currentMonth).toLocaleString(
+    undefined,
+    { month: "long", year: "numeric" }
+  );
+  monthLabel.style.fontSize = "14px";
+  monthLabel.style.fontWeight = "600";
+
+  const controls = document.createElement("div");
+  const prevBtn = document.createElement("button");
+  prevBtn.textContent = "◀";
+  prevBtn.className = "btn-circle";
+  prevBtn.onclick = () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    renderCalendar();
+  };
+  const nextBtn = document.createElement("button");
+  nextBtn.textContent = "▶";
+  nextBtn.className = "btn-circle";
+  nextBtn.onclick = () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+    renderCalendar();
+  };
+  const addBtn = document.createElement("button");
+  addBtn.textContent = "Add Show";
+  addBtn.className = "btn-ghost btn-ghost-sm";
+  addBtn.onclick = () => openEventModal();
+
+  controls.append(prevBtn, nextBtn, addBtn);
+  header.append(monthLabel, controls);
+  container.appendChild(header);
+
+  const grid = document.createElement("div");
+  grid.style.display = "grid";
+  grid.style.gridTemplateColumns = "repeat(7, 1fr)";
+  grid.style.gap = "4px";
+  grid.style.fontSize = "11px";
+
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  days.forEach((d) => {
+    const cell = document.createElement("div");
+    cell.textContent = d;
+    cell.style.textAlign = "center";
+    cell.style.opacity = "0.7";
+    grid.appendChild(cell);
+  });
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement("div");
+    grid.appendChild(empty);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const cell = document.createElement("div");
+    cell.style.minHeight = "60px";
+    cell.style.borderRadius = "10px";
+    cell.style.padding = "4px 6px";
+    cell.style.background = "rgba(5,3,20,0.8)";
+    cell.style.border = "1px solid rgba(148,163,184,0.3)";
+    cell.style.cursor = "pointer";
+    cell.style.display = "flex";
+    cell.style.flexDirection = "column";
+    cell.style.gap = "2px";
+
+    const label = document.createElement("div");
+    label.textContent = day;
+    label.style.fontSize = "11px";
+    label.style.opacity = "0.8";
+    cell.appendChild(label);
+
+    const dateStr = new Date(currentYear, currentMonth, day)
+      .toISOString()
+      .slice(0, 10);
+
+    const dayEvents = events.filter((e) => e.date === dateStr);
+    dayEvents.forEach((ev) => {
+      const pill = document.createElement("div");
+      pill.textContent = ev.title;
+      pill.style.fontSize = "10px";
+      pill.style.padding = "2px 4px";
+      pill.style.borderRadius = "999px";
+      pill.style.background = "rgba(247,37,133,0.25)";
+      pill.style.border = "1px solid rgba(247,37,133,0.7)";
+      pill.title = ev.notes || "";
+      cell.appendChild(pill);
+    });
+
+    cell.onclick = () => openEventListModal(dateStr);
+    grid.appendChild(cell);
+  }
+
+  container.appendChild(grid);
+}
+
+function openEventModal(dateStr = null, existing = null) {
+  const isEdit = !!existing;
+  const title = prompt(
+    (isEdit ? "Edit" : "New") + " Show Title:",
+    existing?.title || ""
+  );
+  if (!title) return;
+
+  const date =
+    dateStr ||
+    prompt(
+      "Date (YYYY-MM-DD):",
+      existing?.date || new Date().toISOString().slice(0, 10)
+    );
+  if (!date) return;
+
+  const time = prompt("Time (e.g. 10:00 PM):", existing?.time || "");
+  const promoter = prompt("Promoter:", existing?.promoter || "");
+  const payout = prompt("Payout (number):", existing?.payout || "");
+  const notes = prompt("Notes:", existing?.notes || "");
+
+  if (isEdit) {
+    existing.title = title;
+    existing.date = date;
+    existing.time = time;
+    existing.promoter = promoter;
+    existing.payout = payout ? Number(payout) : 0;
+    existing.notes = notes;
+  } else {
+    events.push({
+      id: uid(),
+      title,
+      date,
+      time,
+      promoter,
+      payout: payout ? Number(payout) : 0,
+      notes
+    });
+  }
+
+  saveData();
+  renderCalendar();
+  renderFinances();
+}
+
+function openEventListModal(dateStr) {
+  const dayEvents = events.filter((e) => e.date === dateStr);
+  if (!dayEvents.length) {
+    if (confirm("No events. Add one?")) openEventModal(dateStr);
+    return;
+  }
+
+  const choices = dayEvents
+    .map(
+      (e, i) =>
+        `${i + 1}. ${e.title} @ ${e.time || "TBA"} (Promoter: ${
+          e.promoter || "N/A"
+        })`
+    )
+    .join("\n");
+
+  const pick = prompt(
+    `Events on ${formatDate(dateStr)}:\n\n${choices}\n\nType number to edit, or 'n' to add new:`
+  );
+  if (!pick) return;
+  if (pick.toLowerCase() === "n") {
+    openEventModal(dateStr);
+    return;
+  }
+
+  const idx = Number(pick) - 1;
+  if (idx >= 0 && idx < dayEvents.length) {
+    const ev = dayEvents[idx];
+    const action = prompt("Type 'e' to edit, 'd' to delete:", "e");
+    if (!action) return;
+    if (action.toLowerCase() === "e") {
+      openEventModal(dateStr, ev);
+    } else if (action.toLowerCase() === "d") {
+      events = events.filter((e) => e.id !== ev.id);
+      saveData();
+      renderCalendar();
+      renderFinances();
+    }
+  }
+}
+
+// ---------- EMPLOYEES ----------
+
+function renderEmployees() {
+  const container = document.getElementById("employees");
+  container.innerHTML = "";
+
+  const headerRow = document.createElement("div");
+  headerRow.style.display = "flex";
+  headerRow.style.justifyContent = "space-between";
+  headerRow.style.alignItems = "center";
+  headerRow.style.marginBottom = "6px";
+
+  const label = document.createElement("div");
+  label.textContent = `Employees (${employees.length})`;
+  label.style.fontSize = "13px";
+
+  const addBtn = document.createElement("button");
+  addBtn.textContent = "Add Employee";
+  addBtn.className = "btn-ghost btn-ghost-sm";
+  addBtn.onclick = () => openEmployeeModal();
+
+  headerRow.append(label, addBtn);
+  container.appendChild(headerRow);
+
+  if (!employees.length) {
+    const empty = document.createElement("p");
+    empty.textContent = "No employees yet.";
+    empty.style.fontSize = "12px";
+    empty.style.opacity = "0.7";
+    container.appendChild(empty);
+    return;
+  }
+
+  const list = document.createElement("div");
+  list.style.display = "flex";
+  list.style.flexDirection = "column";
+  list.style.gap = "4px";
+
+  employees.forEach((emp) => {
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.justifyContent = "space-between";
+    row.style.alignItems = "center";
+    row.style.padding = "4px 6px";
+    row.style.borderRadius = "10px";
+    row.style.background = "rgba(5,3,20,0.8)";
+    row.style.border = "1px solid rgba(148,163,184,0.3)";
+
+    const left = document.createElement("div");
+    left.style.display = "flex";
+    left.style.flexDirection = "column";
+    left.style.gap = "2px";
+
+    const name = document.createElement("div");
+    name.textContent = `${emp.name} · ${emp.role}`;
+    name.style.fontSize = "12px";
+
+    const meta = document.createElement("div");
+    meta.textContent = `${emp.phone || "No phone"} · ${
+      emp.email || "No email"
+    }`;
+    meta.style.fontSize = "11px";
+    meta.style.opacity = "0.7";
+
+    const pay = document.createElement("div");
+    pay.textContent = `Rate: $${emp.rate || 0}/night · ${emp.status}`;
+    pay.style.fontSize = "11px";
+    pay.style.opacity = "0.7";
+
+    left.append(name, meta, pay);
+
+    const right = document.createElement("div");
+    right.style.display = "flex";
+    right.style.gap = "4px";
+
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+    editBtn.className = "btn-ghost btn-ghost-sm";
+    editBtn.onclick = () => openEmployeeModal(emp);
+
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "✕";
+    delBtn.className = "btn-circle";
+    delBtn.onclick = () => {
+      if (confirm("Remove this employee?")) {
+        employees = employees.filter((e) => e.id !== emp.id);
+        saveData();
+        renderEmployees();
+      }
+    };
+
+    right.append(editBtn, delBtn);
+    row.append(left, right);
+    list.appendChild(row);
+  });
+
+  container.appendChild(list);
+}
+
+function openEmployeeModal(existing = null) {
+  const isEdit = !!existing;
+  const name = prompt("Name:", existing?.name || "");
+  if (!name) return;
+  const role = prompt("Role (DJ, Host, Security, etc.):", existing?.role || "");
+  const phone = prompt("Phone:", existing?.phone || "");
+  const email = prompt("Email:", existing?.email || "");
+  const rate = prompt("Pay rate per night:", existing?.rate || "");
+  const status = prompt(
+    "Status (Active / Inactive):",
+    existing?.status || "Active"
+  );
+
+  if (isEdit) {
+    existing.name = name;
+    existing.role = role;
+    existing.phone = phone;
+    existing.email = email;
+    existing.rate = rate ? Number(rate) : 0;
+    existing.status = status || "Active";
+  } else {
+    employees.push({
+      id: uid(),
+      name,
+      role,
+      phone,
+      email,
+      rate: rate ? Number(rate) : 0,
+      status: status || "Active"
+    });
+  }
+
+  saveData();
+  renderEmployees();
+}
+
+// ---------- PROMOTERS ----------
+
+function renderPromoters() {
+  const container = document.getElementById("promoters");
+  container.innerHTML = "";
+
+  const headerRow = document.createElement("div");
+  headerRow.style.display = "flex";
+  headerRow.style.justifyContent = "space-between";
+  headerRow.style.alignItems = "center";
+  headerRow.style.marginBottom = "6px";
+
+  const label = document.createElement("div");
+  label.textContent = `Promoters (${promoters.length})`;
+  label.style.fontSize = "13px";
+
+  const addBtn = document.createElement("button");
+  addBtn.textContent = "Add Promoter";
+  addBtn.className = "btn-ghost btn-ghost-sm";
+  addBtn.onclick = () => openPromoterModal();
+
+  headerRow.append(label, addBtn);
+  container.appendChild(headerRow);
+
+  if (!promoters.length) {
+    const empty = document.createElement("p");
+    empty.textContent = "No promoters yet.";
+    empty.style.fontSize = "12px";
+    empty.style.opacity = "0.7";
+    container.appendChild(empty);
+    return;
+  }
+
+  const list = document.createElement("div");
+  list.style.display = "flex";
+  list.style.flexDirection = "column";
+  list.style.gap = "4px";
+
+  promoters.forEach((pro) => {
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.justifyContent = "space-between";
+    row.style.alignItems = "center";
+    row.style.padding = "4px 6px";
+    row.style.borderRadius = "10px";
+    row.style.background = "rgba(5,3,20,0.8)";
+    row.style.border = "1px solid rgba(148,163,184,0.3)";
+
+    const left = document.createElement("div");
+    left.style.display = "flex";
+    left.style.flexDirection = "column";
+    left.style.gap = "2px";
+
+    const name = document.createElement("div");
+    name.textContent = `${pro.name} · ${pro.company || "Independent"}`;
+    name.style.fontSize = "12px";
+
+    const meta = document.createElement("div");
+    meta.textContent = `${pro.phone || "No phone"} · ${
+      pro.email || "No email"
+    }`;
+    meta.style.fontSize = "11px";
+    meta.style.opacity = "0.7";
+
+    const terms = document.createElement("div");
+    terms.textContent = `Terms: ${pro.terms || "N/A"}`;
+    terms.style.fontSize = "11px";
+    terms.style.opacity = "0.7";
+
+    left.append(name, meta, terms);
+
+    const right = document.createElement("div");
+    right.style.display = "flex";
+    right.style.gap = "4px";
+
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+    editBtn.className = "btn-ghost btn-ghost-sm";
+    editBtn.onclick = () => openPromoterModal(pro);
+
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "✕";
+    delBtn.className = "btn-circle";
+    delBtn.onclick = () => {
+      if (confirm("Remove this promoter?")) {
+        promoters = promoters.filter((p) => p.id !== pro.id);
+        saveData();
+        renderPromoters();
+      }
+    };
+
+    right.append(editBtn, delBtn);
+    row.append(left, right);
+    list.appendChild(row);
+  });
+
+  container.appendChild(list);
+}
+
+function openPromoterModal(existing = null) {
+  const isEdit = !!existing;
+  const name = prompt("Promoter Name:", existing?.name || "");
+  if (!name) return;
+  const company = prompt("Company:", existing?.company || "");
+  const phone = prompt("Phone:", existing?.phone || "");
+  const email = prompt("Email:", existing?.email || "");
+  const terms = prompt("Deal terms / notes:", existing?.terms || "");
+
+  if (isEdit) {
+    existing.name = name;
+    existing.company = company;
+    existing.phone = phone;
+    existing.email = email;
+    existing.terms = terms;
+  } else {
+    promoters.push({
+      id: uid(),
+      name,
+      company,
+      phone,
+      email,
+      terms
+    });
+  }
+
+  saveData();
+  renderPromoters();
+}
+
+// ---------- FINANCES ----------
+
+function renderFinances() {
+  const container = document.getElementById("finances");
+  container.innerHTML = "";
+
+  const headerRow = document.createElement("div");
+  headerRow.style.display = "flex";
+  headerRow.style.justifyContent = "space-between";
+  headerRow.style.alignItems = "center";
+  headerRow.style.marginBottom = "6px";
+
+  const label = document.createElement("div");
+  label.textContent = "Financial Overview";
+  label.style.fontSize = "13px";
+
+  const addMenu = document.createElement("div");
+  addMenu.style.display = "flex";
+  addMenu.style.gap = "4px";
+
+  const addRev = document.createElement("button");
+  addRev.textContent = "Add Revenue";
+  addRev.className = "btn-ghost btn-ghost-sm";
+  addRev.onclick = () => openFinanceModal("revenue");
+
+  const addExp = document.createElement("button");
+  addExp.textContent = "Add Expense";
+  addExp.className = "btn-ghost btn-ghost-sm";
+  addExp.onclick = () => openFinanceModal("expenses");
+
+  const addPay = document.createElement("button");
+  addPay.textContent = "Add Payout";
+  addPay.className = "btn-ghost btn-ghost-sm";
+  addPay.onclick = () => openFinanceModal("payouts");
+
+  addMenu.append(addRev, addExp, addPay);
+  headerRow.append(label, addMenu);
+  container.appendChild(headerRow);
+
+  const totalRevenue = finances.revenue.reduce((s, r) => s + r.amount, 0);
+  const totalExpenses = finances.expenses.reduce((s, r) => s + r.amount, 0);
+  const totalPayouts = finances.payouts.reduce((s, r) => s + r.amount, 0);
+  const net = totalRevenue - totalExpenses - totalPayouts;
+
+  const summary = document.createElement("div");
+  summary.style.display = "grid";
+  summary.style.gridTemplateColumns = "repeat(4, minmax(0,1fr))";
+  summary.style.gap = "6px";
+  summary.style.marginBottom = "8px";
+
+  function makeCard(label, value, color) {
+    const card = document.createElement("div");
+    card.style.borderRadius = "12px";
+    card.style.padding = "6px 8px";
+    card.style.background = "rgba(5,3,20,0.9)";
+    card.style.border = "1px solid rgba(148,163,184,0.4)";
+    const l = document.createElement("div");
+    l.textContent = label;
+    l.style.fontSize = "11px";
+    l.style.opacity = "0.7";
+    const v = document.createElement("div");
+    v.textContent = `$${value.toFixed(2)}`;
+    v.style.fontSize = "13px";
+    v.style.color = color;
+    v.style.fontWeight = "600";
+    card.append(l, v);
+    return card;
+  }
+
+  summary.append(
+    makeCard("Revenue", totalRevenue, "#4ade80"),
+    makeCard("Expenses", totalExpenses, "#f97373"),
+    makeCard("Payouts", totalPayouts, "#fb923c"),
+    makeCard("Net", net, net >= 0 ? "#4ade80" : "#f97373")
+  );
+
+  container.appendChild(summary);
+
+  const listsWrapper = document.createElement("div");
+  listsWrapper.style.display = "grid";
+  listsWrapper.style.gridTemplateColumns = "repeat(3, minmax(0,1fr))";
+  listsWrapper.style.gap = "6px";
+
+  function makeList(title, items, typeKey) {
+    const panel = document.createElement("div");
+    panel.style.borderRadius = "12px";
+    panel.style.padding = "6px 8px";
+    panel.style.background = "rgba(3,1,15,0.96)";
+    panel.style.border = "1px solid rgba(148,163,184,0.35)";
+    const h = document.createElement("div");
+    h.textContent = title;
+    h.style.fontSize = "12px";
+    h.style.marginBottom = "4px";
+    panel.appendChild(h);
+
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.textContent = "None yet.";
+      empty.style.fontSize = "11px";
+      empty.style.opacity = "0.7";
+      panel.appendChild(empty);
+      return panel;
+    }
+
+    const list = document.createElement("div");
+    list.style.display = "flex";
+    list.style.flexDirection = "column";
+    list.style.gap = "3px";
+
+    items.forEach((item) => {
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.alignItems = "center";
+      row.style.fontSize = "11px";
+
+      const left = document.createElement("div");
+      left.textContent = `${formatDate(item.date)} · ${item.label}`;
+
+      const right = document.createElement("div");
+      right.style.display = "flex";
+      right.style.gap = "4px";
+      const amt = document.createElement("span");
+      amt.textContent = `$${item.amount.toFixed(2)}`;
+      const del = document.createElement("button");
+      del.textContent = "✕";
+      del.className = "btn-circle";
+      del.onclick = () => {
+        if (confirm("Remove this entry?")) {
+          finances[typeKey] = finances[typeKey].filter((f) => f.id !== item.id);
+          saveData();
+          renderFinances();
+        }
+      };
+      right.append(amt, del);
+
+      row.append(left, right);
+      list.appendChild(row);
+    });
+
+    panel.appendChild(list);
+    return panel;
+  }
+
+  listsWrapper.append(
+    makeList("Revenue Entries", finances.revenue, "revenue"),
+    makeList("Expenses", finances.expenses, "expenses"),
+    makeList("Payouts", finances.payouts, "payouts")
+  );
+
+  container.appendChild(listsWrapper);
+}
+
+function openFinanceModal(typeKey) {
+  const label = prompt("Label (e.g. Bar Sales, DJ Fee):", "");
+  if (!label) return;
+  const amountStr = prompt("Amount:", "");
+  if (!amountStr) return;
+  const amount = Number(amountStr);
+  if (Number.isNaN(amount)) return;
+  const date = prompt(
+    "Date (YYYY-MM-DD):",
+    new Date().toISOString().slice(0, 10)
+  );
+  if (!date) return;
+
+  finances[typeKey].push({
+    id: uid(),
+    label,
+    amount,
+    date
+  });
+
+  saveData();
+  renderFinances();
+}
+
+// ---------- INIT ----------
+
+window.addEventListener("load", () => {
+  loadData();
+  renderCalendar();
+  renderEmployees();
+  renderPromoters();
+  renderFinances();
+});

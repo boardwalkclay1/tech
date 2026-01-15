@@ -784,3 +784,94 @@ body {
     height: 220px;
   }
 }
+/* ============================
+   TECH N CHILL ADMIN CRM STYLES
+   ============================ */
+
+/* Calendar container */
+#calendar {
+  padding: 8px;
+  border-radius: 14px;
+}
+
+/* Calendar header */
+#calendar > div:first-child {
+  background: rgba(5, 3, 20, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+/* Calendar grid */
+#calendar div[style*="grid"] {
+  background: rgba(3, 1, 15, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 8px;
+  border-radius: 12px;
+}
+
+/* Calendar day cells */
+#calendar div[style*="min-height"] {
+  transition: 0.15s ease;
+}
+
+#calendar div[style*="min-height"]:hover {
+  border-color: rgba(76, 201, 240, 0.7);
+  box-shadow: 0 0 12px rgba(76, 201, 240, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Employee / Promoter rows */
+#employees > div,
+#promoters > div {
+  background: rgba(3, 1, 15, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 8px;
+  border-radius: 12px;
+}
+
+/* Employee / Promoter list rows */
+#employees div[style*="padding: 4px"],
+#promoters div[style*="padding: 4px"] {
+  transition: 0.15s ease;
+}
+
+#employees div[style*="padding: 4px"]:hover,
+#promoters div[style*="padding: 4px"]:hover {
+  border-color: rgba(247, 37, 133, 0.7);
+  box-shadow: 0 0 12px rgba(247, 37, 133, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Finance summary cards */
+#finances > div:first-child + div > div {
+  background: rgba(5, 3, 20, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  padding: 10px;
+  border-radius: 12px;
+  transition: 0.15s ease;
+}
+
+#finances > div:first-child + div > div:hover {
+  border-color: rgba(76, 201, 240, 0.7);
+  box-shadow: 0 0 14px rgba(76, 201, 240, 0.4);
+}
+
+/* Finance lists */
+#finances div[style*="grid-template-columns"] > div {
+  background: rgba(3, 1, 15, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 8px;
+  border-radius: 12px;
+}
+
+/* Finance list rows */
+#finances div[style*="justify-content: space-between"] {
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.25);
+}
+
+#finances div[style*="justify-content: space-between"]:last-child {
+  border-bottom: none;
+}

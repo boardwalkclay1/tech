@@ -5,11 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TNC Employees · Tech N Chill</title>
   <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* Page-specific polish */
+    .employees-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .admin-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 4px;
+    }
+
+    .admin-row {
+      background: rgba(5,3,20,0.85);
+      border: 1px solid rgba(148,163,184,0.35);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      transition: 0.15s ease;
+    }
+
+    .admin-row:hover {
+      border-color: rgba(76,201,240,0.7);
+      box-shadow: 0 0 14px rgba(76,201,240,0.5);
+      transform: translateY(-2px);
+    }
+
+    .admin-row-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .admin-row-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .admin-row-meta {
+      font-size: 12px;
+      opacity: 0.75;
+    }
+
+    .admin-row-tags {
+      font-size: 11px;
+      color: #f9a8d4;
+    }
+
+    .admin-row-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+  </style>
 </head>
 
 <body>
   <div id="app">
 
+    <!-- HEADER -->
     <header class="tnc-header">
       <div class="logo-block">
         <div class="logo-orb"></div>
@@ -20,8 +81,10 @@
       </div>
     </header>
 
+    <!-- MAIN -->
     <main class="tnc-main">
-      <section class="panel">
+      <section class="panel employees-wrapper">
+
         <div class="panel-header">
           <div>
             <h2>Employees</h2>
@@ -30,12 +93,24 @@
           <button id="add-employee-btn" class="btn-ghost btn-ghost-sm">Add Employee</button>
         </div>
 
-        <div class="admin-list" id="employees-list"></div>
+        <div id="employees-list" class="admin-list"></div>
+
       </section>
     </main>
 
   </div>
 
   <script src="admin.js"></script>
+
+  <script>
+    window.addEventListener("load", () => {
+      adminLoad();
+      renderEmployees();
+
+      const addBtn = document.getElementById("add-employee-btn");
+      if (addBtn) addBtn.addEventListener("click", () => editEmployee(null));
+    });
+  </script>
+
 </body>
 </html>

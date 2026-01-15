@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TNC Calendar · Tech N Chill</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div id="app">
+
+    <header class="tnc-header">
+      <div class="logo-block">
+        <div class="logo-orb"></div>
+        <div class="logo-text">
+          <h1>Show Calendar</h1>
+          <p>Tech N Chill Events</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="tnc-main">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Calendar</h2>
+            <p>Upcoming events & cosplay nights</p>
+          </div>
+          <button id="add-event-btn" class="btn-ghost btn-ghost-sm">Add Show</button>
+        </div>
+
+        <div id="calendar-header"></div>
+        <div id="calendar-grid" class="admin-calendar-grid"></div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

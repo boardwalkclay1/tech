@@ -1,4 +1,8 @@
-// admin.js — Tech N Chill Admin CRM (modular + safe)
+// admin.js — Tech N Chill Admin CRM (modular + safe + complete)
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
 
 const ADMIN_STORAGE = {
   events: "tnc_admin_events_v1",
@@ -518,6 +522,4 @@ function renderFinances() {
   fillFinanceList(payList, adminFinances.payouts, "payouts");
 }
 
-function addFinanceEntry(type) {
-  const label = prompt("Label:", "");
-  if (!label) return
+function add

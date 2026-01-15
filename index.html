@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tech N Chill Nightlink</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ensure hotspot exists and is clickable */
+    #admin-hotspot {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 60px;
+      height: 60px;
+      z-index: 9999;
+    }
+  </style>
 </head>
 <body>
   <div id="app">
@@ -147,10 +158,93 @@
     </div>
   </div>
 
-  <!-- 🔥 ADMIN HOTSPOT ADDED HERE -->
+  <!-- ADMIN HOTSPOT -->
   <div id="admin-hotspot"></div>
 
+  <!-- ADMIN PIN MODAL (SEPARATE FROM PROFILE MODAL) -->
+  <div class="modal-backdrop admin-pin-modal" id="admin-pin-backdrop" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Admin Access</h2>
+        <button class="btn-icon" id="admin-modal-close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <label>
+          PIN Code
+          <input type="password" id="admin-pin-input" autocomplete="off" />
+        </label>
+        <div id="admin-pin-error" style="font-size:11px;color:#f97373;min-height:14px;"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-ghost btn-ghost-sm" id="admin-modal-cancel">Cancel</button>
+        <button class="btn-primary btn-ghost-sm" id="admin-modal-submit">Unlock</button>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
-  <script src="app.js"></script>
+
+  <!-- INLINE ADMIN LOGIC -->
+  <script>
+    const ADMIN_PIN = "4242";
+
+    const hotspot = document.getElementById("admin-hotspot");
+    const adminBackdrop = document.getElementById("admin-pin-backdrop");
+    const adminInput = document.getElementById("admin-pin-input");
+    const adminError = document.getElementById("admin-pin-error");
+    const adminClose = document.getElementById("admin-modal-close");
+    const adminCancel = document.getElementById("admin-modal-cancel");
+    const adminSubmit = document.getElementById("admin-modal-submit");
+
+    let tapCount = 0;
+    let tapTimer = null;
+
+    function openAdminModal() {
+      adminBackdrop.style.display = "flex";
+      adminBackdrop.classList.add("visible");
+      adminError.textContent = "";
+      adminInput.value = "";
+      adminInput.focus();
+    }
+
+    function closeAdminModal() {
+      adminBackdrop.classList.remove("visible");
+      adminBackdrop.style.display = "none";
+    }
+
+    function submitAdminPin() {
+      const value = adminInput.value.trim();
+      if (value === ADMIN_PIN) {
+        adminError.textContent = "";
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 150);
+      } else {
+        adminError.textContent = "Incorrect PIN. Try again.";
+        adminInput.value = "";
+        adminInput.focus();
+      }
+    }
+
+    hotspot.addEventListener("click", () => {
+      tapCount++;
+      if (tapTimer) clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => tapCount = 0, 800);
+
+      if (tapCount >= 4) {
+        tapCount = 0;
+        openAdminModal();
+      }
+    });
+
+    adminClose.addEventListener("click", closeAdminModal);
+    adminCancel.addEventListener("click", closeAdminModal);
+    adminSubmit.addEventListener("click", submitAdminPin);
+    adminInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submitAdminPin();
+    });
+  </script>
 </body>
 </html>

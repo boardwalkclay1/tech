@@ -5,169 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TNC Admin · Tech N Chill</title>
   <link rel="stylesheet" href="style.css" />
+
   <style>
-    .admin-grid {
+    .admin-preview-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.6fr);
+      grid-template-columns: repeat(2, minmax(0,1fr));
       gap: 16px;
     }
-    .admin-column {
+
+    .preview-box {
+      background: rgba(5,3,20,0.85);
+      border: 1px solid rgba(148,163,184,0.35);
+      border-radius: 14px;
+      padding: 12px;
+      min-height: 140px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-    }
-    .admin-section-body {
-      font-size: 12px;
-    }
-    .admin-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 260px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-    .admin-row {
-      display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      padding: 6px 8px;
-      border-radius: 10px;
-      background: rgba(5, 3, 20, 0.85);
-      border: 1px solid rgba(15, 23, 42, 0.8);
-      transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+      transition: 0.15s ease;
     }
-    .admin-row:hover {
-      border-color: rgba(76, 201, 240, 0.7);
-      box-shadow: 0 0 14px rgba(76, 201, 240, 0.55);
-      transform: translateY(-1px);
+
+    .preview-box:hover {
+      border-color: rgba(76,201,240,0.7);
+      box-shadow: 0 0 14px rgba(76,201,240,0.5);
+      transform: translateY(-2px);
     }
-    .admin-row-main {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .admin-row-title {
-      font-size: 13px;
-    }
-    .admin-row-meta {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-    .admin-row-tags {
-      font-size: 10px;
-      color: #f9a8d4;
-    }
-    .admin-row-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      align-items: flex-end;
-      font-size: 11px;
-    }
-    .admin-calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 4px;
-      font-size: 11px;
-    }
-    .admin-calendar-dayname {
-      text-align: center;
-      color: var(--text-muted);
-    }
-    .admin-calendar-cell {
-      min-height: 64px;
-      border-radius: 10px;
-      padding: 4px 6px;
-      background: rgba(5, 3, 20, 0.8);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
-    }
-    .admin-calendar-cell:hover {
-      border-color: rgba(247, 37, 133, 0.7);
-      box-shadow: 0 0 14px rgba(247, 37, 133, 0.5);
-      transform: translateY(-1px);
-    }
-    .admin-calendar-daylabel {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-    .admin-calendar-pill {
-      font-size: 10px;
-      padding: 2px 4px;
-      border-radius: 999px;
-      background: rgba(247, 37, 133, 0.25);
-      border: 1px solid rgba(247, 37, 133, 0.7);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .admin-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .admin-summary-card {
-      border-radius: 12px;
-      padding: 8px 10px;
-      background: rgba(5, 3, 20, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-    }
-    .admin-summary-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: 2px;
-    }
-    .admin-summary-value {
-      font-size: 14px;
+
+    .preview-title {
+      font-size: 15px;
       font-weight: 600;
+      margin-bottom: 6px;
     }
-    .admin-finance-lists {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+
+    .preview-meta {
+      font-size: 12px;
+      opacity: 0.75;
+      margin-bottom: 6px;
     }
-    .admin-finance-panel {
-      border-radius: 12px;
-      padding: 8px 10px;
-      background: rgba(3, 1, 15, 0.96);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      font-size: 11px;
+
+    .preview-link {
+      margin-top: auto;
+      text-align: right;
     }
-    .admin-finance-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 3px 0;
-      border-bottom: 1px dashed rgba(148, 163, 184, 0.25);
+
+    .preview-link a {
+      font-size: 12px;
+      color: #4ade80;
+      text-decoration: underline;
+      cursor: pointer;
     }
-    .admin-finance-row:last-child {
-      border-bottom: none;
-    }
-    .admin-finance-label {
-      max-width: 70%;
-      white-space: nowrap;
+
+    /* Dancing characters */
+    #dancer-strip {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      pointer-events: none;
       overflow: hidden;
-      text-overflow: ellipsis;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 40px;
+      padding-left: 20px;
+      animation: scrollDance 12s linear infinite;
+      font-size: 48px;
     }
-    .admin-finance-amt {
-      margin-right: 4px;
-    }
-    @media (max-width: 900px) {
-      .admin-grid {
-        grid-template-columns: 1fr;
-      }
-      .admin-finance-lists {
-        grid-template-columns: 1fr;
-      }
-      .admin-summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+
+    @keyframes scrollDance {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-120%); }
     }
   </style>
 </head>
@@ -185,89 +94,109 @@
       </div>
     </header>
 
-    <main class="tnc-main admin-grid">
+    <main class="tnc-main">
 
-      <div class="admin-column">
-        <!-- Calendar -->
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h2>Show Calendar</h2>
-              <p>Upcoming events & cosplay nights</p>
-            </div>
-            <button id="add-event-btn" class="btn-ghost btn-ghost-sm">Add Show</button>
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Dashboard Overview</h2>
+            <p>Quick previews of all modules</p>
           </div>
-          <div class="admin-section-body" id="calendar-header"></div>
-          <div class="admin-calendar-grid" id="calendar-grid"></div>
-        </section>
+        </div>
 
-        <!-- Promoters -->
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h2>Promoters</h2>
-              <p>Bookings & partnerships</p>
-            </div>
-            <button id="add-promoter-btn" class="btn-ghost btn-ghost-sm">Add Promoter</button>
-          </div>
-          <div class="admin-section-body">
-            <div class="admin-list" id="promoters-list"></div>
-          </div>
-        </section>
-      </div>
+        <div class="admin-preview-grid">
 
-      <div class="admin-column">
-        <!-- Employees -->
-        <section class="panel">
-          <div class="panel-header">
+          <!-- CALENDAR PREVIEW -->
+          <div class="preview-box" id="preview-calendar">
             <div>
-              <h2>Employees</h2>
-              <p>Staff roster & roles</p>
+              <div class="preview-title">Show Calendar</div>
+              <div class="preview-meta" id="preview-calendar-meta">Loading…</div>
             </div>
-            <button id="add-employee-btn" class="btn-ghost btn-ghost-sm">Add Employee</button>
+            <div class="preview-link">
+              <a href="calendar.html">Open Calendar →</a>
+            </div>
           </div>
-          <div class="admin-section-body">
-            <div class="admin-list" id="employees-list"></div>
-          </div>
-        </section>
 
-        <!-- Finances -->
-        <section class="panel">
-          <div class="panel-header">
+          <!-- EMPLOYEES PREVIEW -->
+          <div class="preview-box" id="preview-employees">
             <div>
-              <h2>Finances</h2>
-              <p>Revenue · Payouts · Expenses</p>
+              <div class="preview-title">Employees</div>
+              <div class="preview-meta" id="preview-employees-meta">Loading…</div>
             </div>
-            <div>
-              <button data-type="revenue" class="btn-ghost btn-ghost-sm admin-add-finance">Add Revenue</button>
-              <button data-type="expense" class="btn-ghost btn-ghost-sm admin-add-finance">Add Expense</button>
-              <button data-type="payout" class="btn-ghost btn-ghost-sm admin-add-finance">Add Payout</button>
+            <div class="preview-link">
+              <a href="employees.html">Open Employees →</a>
             </div>
           </div>
-          <div class="admin-section-body">
-            <div class="admin-summary-grid" id="finance-summary"></div>
-            <div class="admin-finance-lists">
-              <div class="admin-finance-panel">
-                <div class="admin-summary-label">Revenue Entries</div>
-                <div id="finance-revenue-list"></div>
-              </div>
-              <div class="admin-finance-panel">
-                <div class="admin-summary-label">Expenses</div>
-                <div id="finance-expense-list"></div>
-              </div>
-              <div class="admin-finance-panel">
-                <div class="admin-summary-label">Payouts</div>
-                <div id="finance-payout-list"></div>
-              </div>
+
+          <!-- PROMOTERS PREVIEW -->
+          <div class="preview-box" id="preview-promoters">
+            <div>
+              <div class="preview-title">Promoters</div>
+              <div class="preview-meta" id="preview-promoters-meta">Loading…</div>
+            </div>
+            <div class="preview-link">
+              <a href="promoters.html">Open Promoters →</a>
             </div>
           </div>
-        </section>
-      </div>
+
+          <!-- FINANCES PREVIEW -->
+          <div class="preview-box" id="preview-finances">
+            <div>
+              <div class="preview-title">Finances</div>
+              <div class="preview-meta" id="preview-finances-meta">Loading…</div>
+            </div>
+            <div class="preview-link">
+              <a href="finances.html">Open Finances →</a>
+            </div>
+          </div>
+
+        </div>
+      </section>
 
     </main>
 
   </div>
 
+  <!-- Dancing characters -->
+  <div id="dancer-strip">🤡 🧙‍♀️ 🧌 🤡 🧙‍♀️ 🧌 🤡 🧙‍♀️ 🧌</div>
+
   <script src="admin.js"></script>
+
+  <script>
+    // PREVIEW LOADING
+    window.addEventListener("load", () => {
+      // Load data from admin.js
+      adminLoad();
+
+      // Calendar preview
+      const nextEvent = adminEvents[0];
+      document.getElementById("preview-calendar-meta").textContent =
+        nextEvent
+          ? `${nextEvent.title} · ${adminFormatDate(nextEvent.date)}`
+          : "No events scheduled";
+
+      // Employees preview
+      document.getElementById("preview-employees-meta").textContent =
+        adminEmployees.length
+          ? `${adminEmployees.length} staff members`
+          : "No employees added";
+
+      // Promoters preview
+      document.getElementById("preview-promoters-meta").textContent =
+        adminPromoters.length
+          ? `${adminPromoters.length} promoters`
+          : "No promoters added";
+
+      // Finances preview
+      const totalRev = adminFinances.revenue.reduce((s, r) => s + r.amount, 0);
+      const totalExp = adminFinances.expenses.reduce((s, r) => s + r.amount, 0);
+      const totalPay = adminFinances.payouts.reduce((s, r) => s + r.amount, 0);
+      const net = totalRev - totalExp - totalPay;
+
+      document.getElementById("preview-finances-meta").textContent =
+        `Net: $${net.toFixed(2)}`;
+    });
+  </script>
+
 </body>
 </html>

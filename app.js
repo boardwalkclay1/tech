@@ -3,7 +3,7 @@
 const ADMIN_PIN = "4242";
 
 let connectionDotEl, connectionTextEl;
-let modalBackdropEl, modalInputEl, modalErrorEl;
+let adminModalBackdropEl, adminModalInputEl, adminModalErrorEl;
 
 // -----------------------------
 // CONNECTION STATUS
@@ -51,14 +51,16 @@ function setupAdminHotspot() {
 }
 
 // -----------------------------
-// PIN MODAL (FIXED)
+// ADMIN PIN MODAL (FIXED)
 // -----------------------------
-function createPinModalIfNeeded() {
-  // FIX: Only block creation if *admin* modal exists
+function createAdminPinModal() {
+  // Only create if not already created
   if (document.querySelector(".admin-pin-modal")) return;
 
   const backdrop = document.createElement("div");
-  backdrop.className = "modal-backdrop admin-pin-modal"; // FIXED CLASS
+  backdrop.className = "modal-backdrop admin-pin-modal";
+  backdrop.style.zIndex = "9999"; // ensure above everything
+
   backdrop.innerHTML = `
     <div class="modal">
       <div class="modal-header">
@@ -80,45 +82,46 @@ function createPinModalIfNeeded() {
       </div>
     </div>
   `;
+
   document.body.appendChild(backdrop);
 
-  modalBackdropEl = backdrop;
-  modalInputEl = backdrop.querySelector("#admin-pin-input");
-  modalErrorEl = backdrop.querySelector("#admin-pin-error");
+  adminModalBackdropEl = backdrop;
+  adminModalInputEl = backdrop.querySelector("#admin-pin-input");
+  adminModalErrorEl = backdrop.querySelector("#admin-pin-error");
 
   backdrop.querySelector("#admin-modal-close").addEventListener("click", closeAdminPinModal);
   backdrop.querySelector("#admin-modal-cancel").addEventListener("click", closeAdminPinModal);
   backdrop.querySelector("#admin-modal-submit").addEventListener("click", submitAdminPin);
 
-  modalInputEl.addEventListener("keydown", (e) => {
+  adminModalInputEl.addEventListener("keydown", (e) => {
     if (e.key === "Enter") submitAdminPin();
   });
 }
 
 function openAdminPinModal() {
-  createPinModalIfNeeded();
-  modalBackdropEl.classList.add("visible");
-  modalErrorEl.textContent = "";
-  modalInputEl.value = "";
-  modalInputEl.focus();
+  createAdminPinModal();
+  adminModalBackdropEl.classList.add("visible");
+  adminModalErrorEl.textContent = "";
+  adminModalInputEl.value = "";
+  adminModalInputEl.focus();
 }
 
 function closeAdminPinModal() {
-  if (!modalBackdropEl) return;
-  modalBackdropEl.classList.remove("visible");
+  if (!adminModalBackdropEl) return;
+  adminModalBackdropEl.classList.remove("visible");
 }
 
 function submitAdminPin() {
-  const value = modalInputEl.value.trim();
+  const value = adminModalInputEl.value.trim();
   if (value === ADMIN_PIN) {
-    modalErrorEl.textContent = "";
+    adminModalErrorEl.textContent = "";
     setTimeout(() => {
       window.location.href = "admin.html";
     }, 150);
   } else {
-    modalErrorEl.textContent = "Incorrect PIN. Try again.";
-    modalInputEl.value = "";
-    modalInputEl.focus();
+    adminModalErrorEl.textContent = "Incorrect PIN. Try again.";
+    adminModalInputEl.value = "";
+    adminModalInputEl.focus();
   }
 }
 
